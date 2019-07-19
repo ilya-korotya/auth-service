@@ -1,0 +1,58 @@
+version: '3.5'
+
+networks:
+  auth-service-net:
+    name: auth-service-net
+
+services:
+  auth-service:
+    build: .
+    depends_on:
+      - auth-postgres
+      - auth-redis
+    container_name: auth-service
+    expose:
+      - "8080"
+    networks:
+      - auth-service-net
+
+  gateway:
+    image: nginx:1.17
+    container_name: gateway
+    depends_on:
+      - auth-service
+    command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - "8080:80"
+    volumes:
+      - "./nginx:/etc/nginx/conf.d/"
+    networks:
+      - auth-service-net
+
+  auth-postgres:
+    image: postgres:10
+    container_name: auth-postgres
+    networks:
+      - auth-service-net
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  auth-redis:
+    image: redis:4
+    container_name: auth-redis
+    networks:
+      - auth-service-net
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
