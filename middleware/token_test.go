@@ -10,15 +10,15 @@ import (
 
 type Final struct {
 	IsCall bool
-	Next   http.HandlerFunc
+	Next   middleware.HandlerFunc
 }
 
-func (f *Final) Handler(w http.ResponseWriter, r *http.Request) {
+func (f *Final) Handler(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
 	f.IsCall = true
-	f.Next(w, r)
+	f.Next(ctx, w, r)
 }
 
-func TestSetToken(t *testing.T) {
+func TestInitToken(t *testing.T) {
 	type testcase struct {
 		ReqGen           func(m, u string) (*http.Request, error)
 		Final            Final
@@ -44,7 +44,7 @@ func TestSetToken(t *testing.T) {
 				return r, nil
 			},
 			Final: Final{
-				Next: func(w http.ResponseWriter, r *http.Request) {
+				Next: func(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
 					v := r.Context().Value(middleware.Token)
 					if v.(string) != "access-token" {
 						w.WriteHeader(http.StatusUnauthorized)
@@ -60,7 +60,10 @@ func TestSetToken(t *testing.T) {
 
 	for n, test := range testcases {
 		t.Run(n, func(t *testing.T) {
-			s := httptest.NewServer(middleware.SetToken((test.Final.Handler)))
+			m := middleware.InitToken(test.Final.Handler)
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				m(middleware.Context{}, w, r)
+			}))
 			defer s.Close()
 			client := http.Client{}
 			req, err := test.ReqGen(http.MethodGet, s.URL)
