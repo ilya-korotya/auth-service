@@ -32,6 +32,11 @@ services:
   auth-postgres:
     image: postgres:10
     container_name: auth-postgres
+    volumes:
+      # volume for init config
+      - "./store/postgres/:/docker-entrypoint-initdb.d/"
+      # volume for data
+      - "pgdata:/var/lib/postgresql/data"
     networks:
       - auth-service-net
     expose:
@@ -56,3 +61,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+
+volumes:
+  pgdata:
