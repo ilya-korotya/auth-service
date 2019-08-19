@@ -13,6 +13,7 @@ services:
     container_name: auth-service
     expose:
       - "8080"
+      - "8081"
     networks:
       - auth-service-net
 
@@ -34,7 +35,7 @@ services:
     container_name: auth-postgres
     volumes:
       # volume for init config
-      - "./store/postgres/:/docker-entrypoint-initdb.d/"
+      - "./postgres/sql/:/docker-entrypoint-initdb.d/"
       # volume for data
       - "pgdata:/var/lib/postgresql/data"
     networks:

@@ -2,17 +2,19 @@ package middleware_test
 
 import (
 	"context"
+	"github.com/gospeak/auth-service/api/server"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gospeak/auth-service/middleware"
+	"github.com/gospeak/auth-service/api/middleware"
 	"github.com/gospeak/auth-service/mock"
 )
 
-func TestCacheStore(t *testing.T) {
+func TestCacheCheck(t *testing.T) {
+
 	type testcase struct {
-		Store            *mock.GetSetMock
+		Cache            *mock.CacheMock
 		Final            Final
 		FinalIsCall      bool
 		ReqGen           func(u, m string) (*http.Request, error)
@@ -20,8 +22,8 @@ func TestCacheStore(t *testing.T) {
 	}
 
 	testcases := map[string]testcase{
-		"Find token in long store. Status OK": testcase{
-			Store: &mock.GetSetMock{
+		"Find token in cache. Status OK": testcase{
+			Cache: &mock.CacheMock{
 				GetFunc: func(string) string {
 					return "user-token"
 				},
@@ -31,14 +33,14 @@ func TestCacheStore(t *testing.T) {
 			},
 			ResultStatusCode: http.StatusOK,
 		},
-		"Don't find token in long store. Call next middleware": testcase{
-			Store: &mock.GetSetMock{
+		"Don't find token in cache. Call next middleware": testcase{
+			Cache: &mock.CacheMock{
 				GetFunc: func(string) string {
 					return ""
 				},
 			},
 			Final: Final{
-				Next: func(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
+				Next: func(ctx server.Context, w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusTeapot)
 					return
 				},
@@ -53,10 +55,10 @@ func TestCacheStore(t *testing.T) {
 
 	for n, test := range testcases {
 		t.Run(n, func(t *testing.T) {
-			ctx := middleware.Context{
-				Store: test.Store,
+			ctx := server.Context{
+				Cache: test.Cache,
 			}
-			m := middleware.CheckStore(test.Final.Handler)
+			m := middleware.CacheCheck(test.Final.Handler)
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				r = r.WithContext(context.WithValue(r.Context(), middleware.Token, "user-token"))
 				m(ctx, w, r)

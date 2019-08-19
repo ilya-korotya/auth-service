@@ -1,7 +1,7 @@
-package middleware
+package server
 
 import (
-	"net/http"
+	"github.com/gospeak/auth-service/model"
 	"time"
 )
 
@@ -30,8 +30,5 @@ type LongStorage interface {
 // Context for app. Contains logic work for user token
 type Context struct {
 	Cache Cache
-	Store LongStorage
+	DB    *model.Store
 }
-
-// HandlerFunc discare handler type
-type HandlerFunc func(ctx Context, w http.ResponseWriter, r *http.Request)

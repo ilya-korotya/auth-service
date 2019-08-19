@@ -2,17 +2,20 @@ package middleware_test
 
 import (
 	"context"
+	"errors"
+	"github.com/gospeak/auth-service/api/server"
+	"github.com/gospeak/auth-service/model"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gospeak/auth-service/middleware"
+	"github.com/gospeak/auth-service/api/middleware"
 	"github.com/gospeak/auth-service/mock"
 )
 
-func TestCacheCheck(t *testing.T) {
+func TestCacheStore(t *testing.T) {
 	type testcase struct {
-		Cache            *mock.GetSetMock
+		Store            *mock.TokenStoreMock
 		Final            Final
 		FinalIsCall      bool
 		ReqGen           func(u, m string) (*http.Request, error)
@@ -20,10 +23,14 @@ func TestCacheCheck(t *testing.T) {
 	}
 
 	testcases := map[string]testcase{
-		"Find token in cache. Status OK": testcase{
-			Cache: &mock.GetSetMock{
-				GetFunc: func(string) string {
-					return "user-token"
+		"Find token in long store. Status OK": testcase{
+			Store: &mock.TokenStoreMock{
+				GetFunc: func(model.Filter) (*model.Token, error) {
+					return &model.Token{
+						ID:      "mock-id",
+						Content: "user-token",
+						UserID:  "user-id",
+					}, nil
 				},
 			},
 			ReqGen: func(m, u string) (*http.Request, error) {
@@ -31,14 +38,15 @@ func TestCacheCheck(t *testing.T) {
 			},
 			ResultStatusCode: http.StatusOK,
 		},
-		"Don't find token in cache. Call next middleware": testcase{
-			Cache: &mock.GetSetMock{
-				GetFunc: func(string) string {
-					return ""
+		"Don't find token in long store. Call next middleware": testcase{
+			Store: &mock.TokenStoreMock{
+				GetFunc: func(model.Filter) (*model.Token, error) {
+					return nil, errors.New("token not find")
 				},
 			},
+
 			Final: Final{
-				Next: func(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
+				Next: func(ctx server.Context, w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusTeapot)
 					return
 				},
@@ -53,10 +61,12 @@ func TestCacheCheck(t *testing.T) {
 
 	for n, test := range testcases {
 		t.Run(n, func(t *testing.T) {
-			ctx := middleware.Context{
-				Cache: test.Cache,
+			ctx := server.Context{
+				DB: &model.Store{
+					Token: test.Store,
+				},
 			}
-			m := middleware.CacheCheck(test.Final.Handler)
+			m := middleware.CheckStore(test.Final.Handler)
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				r = r.WithContext(context.WithValue(r.Context(), middleware.Token, "user-token"))
 				m(ctx, w, r)

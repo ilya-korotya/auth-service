@@ -5,20 +5,22 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gospeak/auth-service/middleware"
+	"github.com/gospeak/auth-service/api/middleware"
+	"github.com/gospeak/auth-service/api/server"
 )
 
 type Final struct {
 	IsCall bool
-	Next   middleware.HandlerFunc
+	Next   server.HandlerFunc
 }
 
-func (f *Final) Handler(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
+func (f *Final) Handler(ctx server.Context, w http.ResponseWriter, r *http.Request) {
 	f.IsCall = true
 	f.Next(ctx, w, r)
 }
 
 func TestInitToken(t *testing.T) {
+
 	type testcase struct {
 		ReqGen           func(m, u string) (*http.Request, error)
 		Final            Final
@@ -44,7 +46,7 @@ func TestInitToken(t *testing.T) {
 				return r, nil
 			},
 			Final: Final{
-				Next: func(ctx middleware.Context, w http.ResponseWriter, r *http.Request) {
+				Next: func(ctx server.Context, w http.ResponseWriter, r *http.Request) {
 					v := r.Context().Value(middleware.Token)
 					if v.(string) != "access-token" {
 						w.WriteHeader(http.StatusUnauthorized)
@@ -62,7 +64,7 @@ func TestInitToken(t *testing.T) {
 		t.Run(n, func(t *testing.T) {
 			m := middleware.InitToken(test.Final.Handler)
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				m(middleware.Context{}, w, r)
+				m(server.Context{}, w, r)
 			}))
 			defer s.Close()
 			client := http.Client{}
