@@ -13,6 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// TODO (korotya-ilya) don't save password without encryption algorithm
+
 func main() {
 	// TODO (ilya-korotya): maybe better use URL for connection
 	c, err := cache.Open(&redis.Options{
