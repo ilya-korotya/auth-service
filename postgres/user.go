@@ -8,6 +8,7 @@ import (
 
 var (
 	selectUser = "SELECT users.id, user_name, email, password, users.created_at, users.updated_at FROM users %s LIMIT 1"
+	insertUser = "INSER INTO users (id, user_name, email, password) VALUES ($1, $2, $3, $4)"
 )
 
 type UserStore struct {
@@ -32,5 +33,9 @@ func (u *UserStore) Get(f model.Filter) (*model.User, error) {
 }
 
 func (u *UserStore) Set(user *model.User) (*model.User, error) {
-	return nil, nil
+	_, err := u.db.Exec(insertUser, user.ID, user.Name, user.Email, user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
