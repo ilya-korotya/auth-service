@@ -1,6 +1,6 @@
 package model
 
-// Model compositor for entities
+// Store compositor for entities
 type Store struct {
 	User  UserStore
 	Token TokenStore

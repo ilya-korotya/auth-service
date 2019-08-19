@@ -17,7 +17,6 @@ func GetUser(ctx server.Context, w http.ResponseWriter, r *http.Request) {
 	f.ByToken(t)
 	user, err := ctx.DB.User.Get(f)
 	if err != nil {
-		log.Println("database error:", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
