@@ -12,9 +12,8 @@ type JsonNullString struct {
 func (v JsonNullString) MarshalJSON() ([]byte, error) {
 	if v.Valid {
 		return json.Marshal(v.String)
-	} else {
-		return json.Marshal(nil)
 	}
+	return json.Marshal(nil)
 }
 
 func (v *JsonNullString) UnmarshalJSON(data []byte) error {
