@@ -18,7 +18,30 @@ make
 
 ### Public:
 
-In peroccess
+1. Register new user:
+   ```
+   curl --header "Content-Type: application/json" --request POST --data '{"name":"Alexandr","password":"secret"}' http://localhost:8080/user/registration -v
+   ```
+   Body response:
+   ```
+   {
+     "id":"faeaa9cb-7e3f-4c75-b045-de16903ebacf",
+     "name":"Alexandr",
+     "email":null,
+     "password":"2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+     "Token":
+       {
+         "ID":"7dbad679-22a8-4e73-b403-70ad32e5de3f",
+         "Content":"DixLMDCtqudWxtTlbhGrlUXjfyHAzyJwhnyyPFEaGfLZYMHuknXIWQiqGEqkGFP",
+         "UserID":"faeaa9cb-7e3f-4c75-b045-de16903ebacf",
+         "CreatedAt":"0001-01-01T00:00:00Z",
+         "UpdatedAt":"0001-01-01T00:00:00Z",
+         "ExpiredAt":"2019-08-24T17:49:03.824192Z"},
+         "created_at":"0001-01-01T00:00:00Z",
+         "updated_at":"0001-01-01T00:00:00Z"
+        }
+   }
+   ```
 
 ### Internal:
 1. Get user by token:
