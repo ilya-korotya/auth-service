@@ -40,7 +40,7 @@ func main() {
 	m := middleware.InitToken(middleware.CacheCheck(middleware.CheckStore(middleware.Final)))
 	pub := server.New(ctx)
 	pub.Get("/", m) // must be in all urls
-	pub.Post("user/registration", public.RegistrationUser)
+	pub.Post("/user/registration", public.RegistrationUser)
 	go func() {
 		log.Println("run public api")
 		log.Println("public apu error:", pub.Run(":8080"))
