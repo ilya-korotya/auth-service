@@ -12,7 +12,7 @@ type GetToken interface {
 
 // SetToken to store with expiration date
 type SetToken interface {
-	Set(string, string, time.Duration) error
+	Set(token, userID string, expireTime time.Time) error
 }
 
 // Cache for cache(redis) provider

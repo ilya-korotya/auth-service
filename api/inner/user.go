@@ -2,7 +2,6 @@ package inner
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gospeak/auth-service/api/server"

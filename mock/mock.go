@@ -10,7 +10,7 @@ type CacheMock struct {
 	GetIsCall bool
 	GetFunc   func(string) string
 	SetIsCall bool
-	SetFunc   func(string, string, time.Duration) error
+	SetFunc   func(string, string, time.Time) error
 }
 
 func (c *CacheMock) Get(key string) string {
@@ -18,7 +18,7 @@ func (c *CacheMock) Get(key string) string {
 	return c.GetFunc(key)
 }
 
-func (c *CacheMock) Set(key, value string, expiration time.Duration) error {
+func (c *CacheMock) Set(key, value string, expiration time.Time) error {
 	c.SetIsCall = true
 	return c.SetFunc(key, value, expiration)
 }

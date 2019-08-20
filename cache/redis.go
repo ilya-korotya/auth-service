@@ -27,6 +27,7 @@ func (c Client) Get(key string) string {
 }
 
 // Set string to cache. If expiration 0 cache don't remove by time
-func (c Client) Set(key, value string, expiration time.Duration) error {
-	return c.r.Set(key, value, expiration).Err()
+func (c Client) Set(key, value string, expiration time.Time) error {
+	d := time.Now().Sub(expiration)
+	return c.r.Set(key, value, d).Err()
 }

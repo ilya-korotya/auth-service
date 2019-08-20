@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gospeak/auth-service/api/inner"
+	"github.com/gospeak/auth-service/api/public"
 	"github.com/gospeak/auth-service/api/server"
 	"github.com/gospeak/auth-service/model"
 	"github.com/gospeak/auth-service/postgres"
@@ -40,7 +41,8 @@ func main() {
 	// run public api
 	m := middleware.InitToken(middleware.CacheCheck(middleware.CheckStore(middleware.Final)))
 	pub := server.New(ctx)
-	pub.Get("/", m)
+	pub.Get("/", m) // must be in all urls
+	pub.Post("/user/registration", public.RegistrationUser)
 	go func() {
 		log.Println("run public api")
 		log.Println("public apu error:", pub.Run(":8080"))
