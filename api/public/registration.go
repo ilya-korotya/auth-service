@@ -27,6 +27,7 @@ func RegistrationUser(ctx server.Context, w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
 	// registration user
 	user.Password = hash(user.Password)
 	user.Token.Content = generateToken(63)
