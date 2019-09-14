@@ -43,6 +43,7 @@ func main() {
 	pub := server.New(ctx)
 	pub.Get("/", m) // must be in all urls
 	pub.Post("/user/registration", public.RegistrationUser)
+	pub.Post("/user/login", public.LoginUser)
 	go func() {
 		log.Println("run public api")
 		log.Println("public apu error:", pub.Run(":8080"))

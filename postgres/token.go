@@ -8,6 +8,7 @@ import (
 
 var (
 	selectToken = "SELECT id, token, user_id, created_at, updated_at, expired_at FROM tokens %s LIMIT 1"
+	insertToken = "INSERT INTO tokens (token, user_id, expired_at) VALUES ($1, $2, $3) RETURNING token, user_id, expired_at"
 )
 
 type TokenStore struct {
@@ -34,5 +35,12 @@ func (t *TokenStore) Get(f model.Filter) (*model.Token, error) {
 
 // Set stet user_id via key(token) to long storage
 func (t *TokenStore) Set(token *model.Token) (*model.Token, error) {
-	return nil, nil
+	if err := t.db.QueryRow(insertToken, token.Content, token.UserID, token.ExpiredAt).Scan(
+		&token.Content,
+		&token.UserID,
+		&token.ExpiredAt,
+	); err != nil {
+		return nil, err
+	}
+	return token, nil
 }
